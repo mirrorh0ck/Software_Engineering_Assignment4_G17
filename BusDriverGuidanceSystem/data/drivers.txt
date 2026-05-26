@@ -1,0 +1,2 @@
+# Driver records will be stored here in a later commit.
+# Format and TXT-file persistence not implemented yet.

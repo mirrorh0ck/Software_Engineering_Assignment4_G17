@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Intelligent Bus Driver Guidance System - Initial scaffolding
+    ISYS3413/ISYS3475/ISYS1118 - Software Engineering Fundamentals
+    Assignment 4 - Team G17
+
+    NOTE: This is the very first cut of the project. We only have:
+      - a Maven build file
+      - the four domain/repository classes (skeleton)
+    Validators, TXT persistence, JUnit 5 tests and CI will be added
+    in later commits.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.busdriver</groupId>
+    <artifactId>bus-driver-guidance-system</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>Intelligent Bus Driver Guidance System</name>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <!--
+        TODO (later commit): add JUnit Jupiter dependencies once the
+        first round of unit tests is written.
+    -->
+    <dependencies>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+            </plugin>
+        </plugins>
+    </build>
+</project>
