@@ -1,27 +1,58 @@
 package com.busdriver.model;
 
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.format.DateTimeFormatter;
+import java.util.Objects;
+
 /**
  * Domain entity representing a bus driver in the Intelligent
  * Bus Driver Guidance System.
  *
- * <p>This is the very first cut of the class - it only carries
- * state (fields, constructor, getters, setters). Business rules
- * D1-D5 will be enforced by a dedicated DriverValidator that we
- * will introduce in a later commit.</p>
+ * The fields are exactly those required by the Assignment 4
+ * specification. Validation of business rules (D1-D5) is delegated
+ * to DriverValidator; this class only holds state and
+ * provides simple derived helpers such as .getAge().
  */
 public class Driver {
 
-    // --- Fields specified by the Assignment 4 brief --------------
+    /** Date format mandated by D3 (e.g. "21-04-1995"). */
+    public static final DateTimeFormatter BIRTHDATE_FORMAT =
+            DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
+    /** Unique 10-character identifier for the driver (see D1). */
     private String driverID;
+
+    /** Full name of the driver. Immutable after creation per D5. */
     private String name;
-    private int    experienceYears;
-    private String licenseType; // Light, Medium, Heavy, PublicTransport
+
+    /** Years of driving experience. Drives B4 (electric bus rule). */
+    private int experienceYears;
+
+    /** License type. One of: Light, Medium, Heavy, PublicTransport. */
+    private String licenseType;
+
+    /** Address in pipe-separated form per D2. */
     private String address;
-    private String birthdate;   // expected format DD-MM-YYYY (D3)
 
-    // --- Constructor ---------------------------------------------
+    /** Birthdate string in DD-MM-YYYY format per D3. */
+    private String birthdate;
 
+    /**
+     * Full constructor. The constructor itself does NOT validate;
+     * validation is the responsibility of
+     * DriverValidator.validateForAdd(...) when adding to a
+     * repository. This keeps the model class lightweight and lets
+     * unit tests construct intentionally-invalid drivers when
+     * exercising negative cases.
+     *
+     * @param driverID        unique 10-char identifier
+     * @param name            driver's full name
+     * @param experienceYears years of driving experience (>= 0)
+     * @param licenseType     license category
+     * @param address         address in D2 pipe-separated format
+     * @param birthdate       birthdate string in DD-MM-YYYY
+     */
     public Driver(String driverID, String name, int experienceYears,
                   String licenseType, String address, String birthdate) {
         this.driverID = driverID;
@@ -32,7 +63,7 @@ public class Driver {
         this.birthdate = birthdate;
     }
 
-    // --- Getters -------------------------------------------------
+    // --- Getters -----------------------------------------------------
 
     public String getDriverID()        { return driverID; }
     public String getName()            { return name; }
@@ -41,31 +72,67 @@ public class Driver {
     public String getAddress()         { return address; }
     public String getBirthdate()       { return birthdate; }
 
-    // --- Setters -------------------------------------------------
-    // NOTE: D5 says driverID and name must be immutable on update,
-    //       so no setters will be provided for those once the
-    //       validator is in place. For now we keep the fields
-    //       package-final and offer setters only for the mutable
-    //       fields the repository will need.
+    // --- Setters -----------------------------------------------------
+    // Note: driverID and name have no public setter (D5 - immutable).
+    //       The repository's update() method enforces D4 (license lock
+    //       for >10 years experience) before calling these setters.
 
+    /** Set experience years. Used by repository update operations. */
     public void setExperienceYears(int experienceYears) {
         this.experienceYears = experienceYears;
     }
 
+    /** Set license type. Repository must enforce D4 before calling. */
     public void setLicenseType(String licenseType) {
         this.licenseType = licenseType;
     }
 
+    /** Set address. Repository must validate D2 before calling. */
     public void setAddress(String address) {
         this.address = address;
     }
 
+    /** Set birthdate. Repository must validate D3 before calling. */
     public void setBirthdate(String birthdate) {
         this.birthdate = birthdate;
     }
 
+    // --- Derived helpers --------------------------------------------
+
+    /**
+     * Compute the driver's age in completed years based on the
+     * stored birthdate. Used by Bus rule B3 (drivers over 50
+     * cannot operate large-capacity buses).
+     *
+     * @return the driver's age in whole years
+     */
+    public int getAge() {
+        LocalDate dob = LocalDate.parse(birthdate, BIRTHDATE_FORMAT);
+        return Period.between(dob, LocalDate.now()).getYears();
+    }
+
+    // --- equals/hashCode/toString -----------------------------------
+
+    /**
+     * Two drivers are considered equal iff their driverIDs match,
+     * since D1 guarantees driverID uniqueness.
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Driver)) return false;
+        Driver other = (Driver) o;
+        return Objects.equals(driverID, other.driverID);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(driverID);
+    }
+
     @Override
     public String toString() {
-        return "Driver{" + driverID + ", " + name + "}";
+        return "Driver{" + driverID + ", " + name + ", " + experienceYears
+                + "y, " + licenseType + "}";
     }
 }
