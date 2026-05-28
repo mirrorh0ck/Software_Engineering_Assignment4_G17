@@ -1,14 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Intelligent Bus Driver Guidance System - Initial scaffolding
+    Intelligent Bus Driver Guidance System
+    Maven build file
     ISYS3413/ISYS3475/ISYS1118 - Software Engineering Fundamentals
     Assignment 4 - Team G17
-
-    NOTE: This is the very first cut of the project. We only have:
-      - a Maven build file
-      - the four domain/repository classes (skeleton)
-    Validators, TXT persistence, JUnit 5 tests and CI will be added
-    in later commits.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -19,30 +14,69 @@
 
     <groupId>com.busdriver</groupId>
     <artifactId>bus-driver-guidance-system</artifactId>
-    <version>0.4.0-SNAPSHOT</version>
+    <version>0.65.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>Intelligent Bus Driver Guidance System</name>
+    <description>
+        Maven project for ISYS3413 Assignment 4. Provides driver/bus
+        management with TXT-file persistence and JUnit 5 tests.
+    </description>
 
     <properties>
+        <!-- Source/target Java level for the project -->
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- JUnit Jupiter (JUnit 5) version -->
+        <junit.jupiter.version>5.10.2</junit.jupiter.version>
     </properties>
 
-    <!--
-        TODO (later commit): add JUnit Jupiter dependencies once the
-        first round of unit tests is written.
-    -->
     <dependencies>
+        <!-- JUnit Jupiter API for writing unit and integration tests -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>${junit.jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- JUnit Jupiter engine for running tests -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${junit.jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- Parameterised tests support (used by a few unit tests) -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>${junit.jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
+            <!-- Compiler plugin: enforce Java 17 source/target -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.13.0</version>
+            </plugin>
+            <!-- Surefire runs unit + integration tests on `mvn test` -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.5</version>
+                <configuration>
+                    <!-- Include both unit and integration test classes -->
+                    <includes>
+                        <include>**/*Test.java</include>
+                        <include>**/*Tests.java</include>
+                        <include>**/*IT.java</include>
+                    </includes>
+                </configuration>
             </plugin>
         </plugins>
     </build>
