@@ -80,6 +80,23 @@ public class Bus {
         return Objects.hash(busID);
     }
 
+    /**
+     * Serialised pipe-delimited form used when writing to the TXT
+     * "database" file. Format:
+     * busID|capacity|fuelLevel|fuelType|assignedDriverID
+     *
+     * "-" is written when no driver has been assigned, so the file
+     * remains human-readable.
+     */
+    public String toRecord() {
+        return String.join("|",
+                busID,
+                String.valueOf(capacity),
+                String.valueOf(fuelLevel),
+                fuelType,
+                assignedDriverID == null ? "-" : assignedDriverID);
+    }
+
     @Override
     public String toString() {
         return "Bus{" + busID + ", cap=" + capacity + ", fuel=" + fuelLevel

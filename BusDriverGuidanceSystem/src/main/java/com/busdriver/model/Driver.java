@@ -130,6 +130,24 @@ public class Driver {
         return Objects.hash(driverID);
     }
 
+    /**
+     * Serialised pipe-delimited form used when writing to the TXT
+     * "database" file. Format:
+     * driverID~name~experienceYears~licenseType~address~birthdate
+     *
+     * Note: the address itself contains pipes (D2), so "~" is used as
+     * the outer field separator to avoid ambiguity when parsing.
+     */
+    public String toRecord() {
+        return String.join("~",
+                driverID,
+                name,
+                String.valueOf(experienceYears),
+                licenseType,
+                address,
+                birthdate);
+    }
+
     @Override
     public String toString() {
         return "Driver{" + driverID + ", " + name + ", " + experienceYears
