@@ -14,7 +14,7 @@
 
     <groupId>com.busdriver</groupId>
     <artifactId>bus-driver-guidance-system</artifactId>
-    <version>0.70.0-SNAPSHOT</version>
+    <version>0.90.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>Intelligent Bus Driver Guidance System</name>

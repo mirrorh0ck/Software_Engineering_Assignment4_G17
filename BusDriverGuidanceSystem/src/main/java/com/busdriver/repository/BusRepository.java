@@ -17,34 +17,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-/**
- * TXT-file backed repository for Bus entities.
- *
- * Records are stored one-per-line using "|" as the field
- * separator (safe because Bus fields do not contain "|" themselves).
- * Lines beginning with "#" are treated as comments.
- *
- * Operations supported (per Assignment 4 spec):
- *
- *   - .add(Bus) - validate B1 and persist.
- *   - .retrieve(String) - look up by busID.
- *   - .update(Bus) - validate B2 and persist.
- *   - .count() - return the number of stored buses.
- *   - .assignDriver(String, Driver) - validate B3/B4/B5
- *       and link a driver to the bus.
- */
+// File-backed repository for buses.
+// Similar to DriverRepository but uses '|' as separator (Bus fields don't
+// contain '|' so this is safe).
+// Has an extra assignDriver(busID, driver) method - that's the only way
+// to exercise rules B3 / B4 / B5.
 public class BusRepository {
 
-    /** Field separator inside the TXT file. */
     private static final String SEPARATOR = "|";
+    private static final String SEPARATOR_REGEX = "\\|";   // '|' is a regex metachar
 
-    /** Regex form of the separator for split() calls. */
-    private static final String SEPARATOR_REGEX = "\\|";
-
-    /** Underlying TXT file path. */
     private final Path filePath;
-
-    /** In-memory cache keyed by busID. */
     private final Map<String, Bus> buses = new LinkedHashMap<>();
 
     public BusRepository(String filePath) {
@@ -56,90 +39,70 @@ public class BusRepository {
         load();
     }
 
-    // =================================================================
-    // CRUD operations
-    // =================================================================
+    // ===== CRUD =====
 
-    /** Add a new bus; validate B1 and persist. */
     public void add(Bus b) {
-        BusValidator.validateForAdd(b, buses.keySet());
+        BusValidator.validateForAdd(b, buses.keySet());  // B1
         buses.put(b.getBusID(), b);
         save();
     }
 
-    /** Retrieve a bus by ID. */
     public Optional<Bus> retrieve(String busID) {
         return Optional.ofNullable(buses.get(busID));
     }
 
-    /** Return all stored buses as an unmodifiable list snapshot. */
     public List<Bus> retrieveAll() {
         return Collections.unmodifiableList(new ArrayList<>(buses.values()));
     }
 
-    /**
-     * Update an existing bus. busID is taken from updated
-     * and must match an existing record. B2 (capacity cannot
-     * increase) is enforced.
-     */
     public void update(Bus updated) {
         if (updated == null) {
-            throw new ValidationException("bus must not be null");
+            throw new ValidationException("bus cannot be null");
         }
         Bus existing = buses.get(updated.getBusID());
         if (existing == null) {
             throw new ValidationException(
-                    "Bus with ID '" + updated.getBusID() + "' not found");
+                    "bus with ID '" + updated.getBusID() + "' not found");
         }
-        BusValidator.validateForUpdate(existing, updated);
+        BusValidator.validateForUpdate(existing, updated);  // B2
 
         existing.setCapacity(updated.getCapacity());
         existing.setFuelLevel(updated.getFuelLevel());
         existing.setFuelType(updated.getFuelType());
+        // only overwrite assignedDriver if a value was supplied, so an update
+        // that doesn't mention the driver doesn't accidentally unassign them
         if (updated.getAssignedDriverID() != null) {
             existing.setAssignedDriverID(updated.getAssignedDriverID());
         }
         save();
     }
 
-    /** Return the number of stored buses. */
     public int count() {
         return buses.size();
     }
 
-    /**
-     * Assign a driver to a bus, enforcing B3, B4, B5 first.
-     * The driver-bus link is then persisted to the TXT file.
-     *
-     * @param busID  ID of the target bus (must exist)
-     * @param driver the candidate driver
-     */
+    // Assign a driver to a bus. This runs B3/B4/B5 first, then persists.
     public void assignDriver(String busID, Driver driver) {
         Bus bus = buses.get(busID);
         if (bus == null) {
-            throw new ValidationException(
-                    "Bus with ID '" + busID + "' not found");
+            throw new ValidationException("bus with ID '" + busID + "' not found");
         }
         BusValidator.validateAssignment(driver, bus);
         bus.setAssignedDriverID(driver.getDriverID());
         save();
     }
 
-    /** Clear both in-memory map and underlying file. */
     public void clearAll() {
         buses.clear();
         save();
     }
 
-    // =================================================================
-    // File I/O
-    // =================================================================
+    // ===== file IO =====
 
     private void load() {
         buses.clear();
-        if (!Files.exists(filePath)) {
-            return;
-        }
+        if (!Files.exists(filePath)) return;
+
         try {
             List<String> lines = Files.readAllLines(filePath);
             for (String line : lines) {
@@ -147,9 +110,9 @@ public class BusRepository {
                 if (line.startsWith("#")) continue;
 
                 String[] parts = line.split(SEPARATOR_REGEX, -1);
-                if (parts.length < 4 || parts.length > 5) {
-                    continue;
-                }
+                // 4 fields when no driver assigned, 5 when assigned
+                if (parts.length < 4 || parts.length > 5) continue;
+
                 try {
                     int capacity = Integer.parseInt(parts[1].trim());
                     double fuelLevel = Double.parseDouble(parts[2].trim());
@@ -159,12 +122,11 @@ public class BusRepository {
                     }
                     buses.put(b.getBusID(), b);
                 } catch (NumberFormatException nfe) {
-                    // malformed numeric field - skip
+                    // numeric field parse failed, skip
                 }
             }
         } catch (IOException ex) {
-            throw new ValidationException(
-                    "Failed to load bus file: " + filePath, ex);
+            throw new ValidationException("could not load bus file: " + filePath, ex);
         }
     }
 
@@ -181,18 +143,10 @@ public class BusRepository {
             }
             Files.write(filePath, lines);
         } catch (IOException ex) {
-            throw new ValidationException(
-                    "Failed to save bus file: " + filePath, ex);
+            throw new ValidationException("could not save bus file: " + filePath, ex);
         }
     }
 
-    /** Test helper: expose the underlying file path. */
-    public Path getFilePath() {
-        return filePath;
-    }
-
-    /** Test helper: snapshot of in-memory map. */
-    public Map<String, Bus> snapshot() {
-        return new HashMap<>(buses);
-    }
+    public Path getFilePath() { return filePath; }
+    public Map<String, Bus> snapshot() { return new HashMap<>(buses); }
 }

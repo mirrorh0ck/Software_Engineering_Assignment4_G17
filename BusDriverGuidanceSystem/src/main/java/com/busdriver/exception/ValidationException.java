@@ -1,36 +1,20 @@
 package com.busdriver.exception;
 
-/**
- * Custom unchecked exception thrown when a Driver / Bus business rule
- * (D1-D5 or B1-B5) is violated, or when an Add/Update/Retrieve operation
- * fails its preconditions.
- *
- * Using a dedicated exception type lets the JUnit 5 tests assert on
- * the exception type (e.g. via assertThrows) without coupling to
- * generic RuntimeException.
- */
+// Our own exception for business rule violations.
+// Used whenever a Driver rule (D1-D5) or a Bus rule (B1-B5) is broken.
+// Extends RuntimeException so we don't have to declare throws everywhere
+// (covered in week 5 - unchecked exceptions).
 public class ValidationException extends RuntimeException {
 
-    /** Serial version UID for serialization compatibility. */
+    // Just to silence the IDE warning about serialisation
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Build a validation exception with a human-readable message that
-     * states which business rule was violated.
-     *
-     * @param message the explanation of the rule violation
-     */
+    // basic message-only constructor
     public ValidationException(String message) {
         super(message);
     }
 
-    /**
-     * Build a validation exception that wraps an underlying cause
-     * (e.g. an IOException while reading the TXT file).
-     *
-     * @param message description of the failure
-     * @param cause   the underlying exception
-     */
+    // wrap another exception when we need to (e.g. IOException from file load)
     public ValidationException(String message, Throwable cause) {
         super(message, cause);
     }
