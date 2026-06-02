@@ -50,5 +50,5 @@ BusDriverGuidanceSystem/
 
 ## Authors (G17)
 
-Lee Sunjin (s3911760), Max Busuttil (s4169373),
+Lee Sunjin (s3911760) Mirrorh0ck, Max Busuttil (s4169373),
 Ethan Patten-Cox (s4167742), Martin Tippett (s4168666).
