@@ -1,7 +1,6 @@
 # CI workflow for the Intelligent Bus Driver Guidance System.
 # Runs the full Maven test suite (50 tests) every time we push or open a PR.
-# The demo video uses this - editing a .txt file and pushing triggers
-# this job and the Actions tab shows the green tick.
+# The Maven project lives inside the BusDriverGuidanceSystem subfolder.
 
 name: Java CI with Maven
 
@@ -16,12 +15,15 @@ jobs:
     name: Build & Test (Ubuntu, JDK 17)
     runs-on: ubuntu-latest
 
+    # all maven commands run from the project subfolder
+    defaults:
+      run:
+        working-directory: BusDriverGuidanceSystem
+
     steps:
-      # 1. grab the source at the commit that triggered the build
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. install Temurin JDK 17 and enable Maven dependency caching
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -29,25 +31,21 @@ jobs:
           java-version: '17'
           cache: 'maven'
 
-      # 3. quick sanity print of the toolchain so logs are easy to debug
       - name: Show toolchain versions
         run: |
           java -version
           mvn -v
 
-      # 4. compile main + test sources (-B = batch, -ntp = quieter)
       - name: Compile
         run: mvn -B -ntp clean compile test-compile
 
-      # 5. run all unit + integration tests
       - name: Run tests
         run: mvn -B -ntp test
 
-      # 6. upload the surefire reports - handy when a test fails
       - name: Upload test reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: surefire-reports
-          path: target/surefire-reports/
+          path: BusDriverGuidanceSystem/target/surefire-reports/
           if-no-files-found: ignore
