@@ -1,2 +1,3 @@
 # Driver records will be stored here in a later commit.
 # Format and TXT-file persistence not implemented yet.
+# DemoDR99~Demo Driver~7~Standard~10|Demo Street|Melbourne|VIC|Australia~01-01-1990
